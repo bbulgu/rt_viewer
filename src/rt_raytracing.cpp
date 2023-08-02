@@ -112,6 +112,16 @@ void setupScene(RTContext &rtx, const char *filename)
     //}
 }
 
+inline double random_double() {
+    // Returns a random real in [0,1).
+    return rand() / (RAND_MAX + 1.0);
+}
+
+inline double random_double(double min, double max) {
+    // Returns a random real in [min,max).
+    return min + (max - min) * random_double();
+}
+
 // MODIFY THIS FUNCTION!
 void updateLine(RTContext &rtx, int y)
 {
@@ -125,10 +135,11 @@ void updateLine(RTContext &rtx, int y)
     glm::mat4 world_from_view = glm::inverse(rtx.view);
 
     // You can try parallelising this loop by uncommenting this line:
-    //#pragma omp parallel for schedule(dynamic)
+    #pragma omp parallel for schedule(dynamic)
     for (int x = 0; x < nx; ++x) {
-        float u = (float(x) + 0.5f) / float(nx);
-        float v = (float(y) + 0.5f) / float(ny);
+        // anti aliasing
+        float u = (float(x) + random_double()) / float(nx);
+        float v = (float(y) + random_double()) / float(ny);
         Ray r(origin, lower_left_corner + u * horizontal + v * vertical);
         r.A = glm::vec3(world_from_view * glm::vec4(r.A, 1.0f));
         r.B = glm::vec3(world_from_view * glm::vec4(r.B, 0.0f));
