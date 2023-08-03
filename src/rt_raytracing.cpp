@@ -19,6 +19,39 @@ struct Scene {
     Box mesh_bbox;
 } g_scene;
 
+// utility functions for random numbers
+
+inline double random_double() {
+    // Returns a random real in [0,1).
+    return rand() / (RAND_MAX + 1.0);
+}
+
+inline double random_double(double min, double max) {
+    // Returns a random real in [min,max).
+    return min + (max - min) * random_double();
+}
+
+inline static glm::vec3 random() {
+    return glm::vec3(random_double(), random_double(), random_double());
+}
+
+inline static glm::vec3 random(double min, double max) {
+    return glm::vec3(random_double(min, max), random_double(min, max), random_double(min, max));
+}
+
+inline static double vector_length(glm::vec3 v)
+{
+    return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+}
+
+inline static glm::vec3 random_in_unit_sphere() {
+    while (true) {
+        glm::vec3 p = random(-1, 1);
+        if (vector_length(p) * vector_length(p) >= 1) continue;
+        return p;
+    }
+}
+
 bool hit_world(const Ray &r, float t_min, float t_max, HitRecord &rec)
 {
     HitRecord temp_rec;
@@ -73,8 +106,13 @@ glm::vec3 color(RTContext &rtx, const Ray &r, int max_bounces)
         if (rtx.show_normals) { return rec.normal * 0.5f + 0.5f; }
 
         // Implement lighting for materials here
-        // ...
-        return glm::vec3(0.0f);
+        // Diffuse 
+        
+        glm::vec3 target = rec.p + rec.normal + random_in_unit_sphere();
+        //std::cout << "diffuse " << std::endl;   
+        return color(rtx, Ray(rec.p, target - rec.p), max_bounces - 1) * 0.5f;
+        
+        //return glm::vec3(0.0f);
     }
 
     // If no hit, return sky color
@@ -112,15 +150,6 @@ void setupScene(RTContext &rtx, const char *filename)
     //}
 }
 
-inline double random_double() {
-    // Returns a random real in [0,1).
-    return rand() / (RAND_MAX + 1.0);
-}
-
-inline double random_double(double min, double max) {
-    // Returns a random real in [min,max).
-    return min + (max - min) * random_double();
-}
 
 // MODIFY THIS FUNCTION!
 void updateLine(RTContext &rtx, int y)
