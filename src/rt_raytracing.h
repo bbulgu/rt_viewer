@@ -24,6 +24,7 @@ struct RTContext {
     bool show_normals = false;
     // Add more settings and parameters here
     // ...
+    bool gamma = true;
 };
 
 void setupScene(RTContext &rtx, const char *mesh_filename);

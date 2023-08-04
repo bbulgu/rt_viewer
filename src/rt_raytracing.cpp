@@ -4,9 +4,11 @@
 #include "rt_sphere.h"
 #include "rt_triangle.h"
 #include "rt_box.h"
+#include "rt_material.h"
 
 #include "cg_utils2.h"  // Used for OBJ-mesh loading
 #include <stdlib.h>     // Needed for drand48()
+
 
 namespace rt {
 
@@ -19,38 +21,6 @@ struct Scene {
     Box mesh_bbox;
 } g_scene;
 
-// utility functions for random numbers
-
-inline double random_double() {
-    // Returns a random real in [0,1).
-    return rand() / (RAND_MAX + 1.0);
-}
-
-inline double random_double(double min, double max) {
-    // Returns a random real in [min,max).
-    return min + (max - min) * random_double();
-}
-
-inline static glm::vec3 random() {
-    return glm::vec3(random_double(), random_double(), random_double());
-}
-
-inline static glm::vec3 random(double min, double max) {
-    return glm::vec3(random_double(min, max), random_double(min, max), random_double(min, max));
-}
-
-inline static double vector_length(glm::vec3 v)
-{
-    return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-}
-
-inline static glm::vec3 random_in_unit_sphere() {
-    while (true) {
-        glm::vec3 p = random(-1, 1);
-        if (vector_length(p) * vector_length(p) >= 1) continue;
-        return p;
-    }
-}
 
 bool hit_world(const Ray &r, float t_min, float t_max, HitRecord &rec)
 {
@@ -106,13 +76,12 @@ glm::vec3 color(RTContext &rtx, const Ray &r, int max_bounces)
         if (rtx.show_normals) { return rec.normal * 0.5f + 0.5f; }
 
         // Implement lighting for materials here
-        // Diffuse 
-        
-        glm::vec3 target = rec.p + rec.normal + random_in_unit_sphere();
-        //std::cout << "diffuse " << std::endl;   
-        return color(rtx, Ray(rec.p, target - rec.p), max_bounces - 1) * 0.5f;
-        
-        //return glm::vec3(0.0f);
+        Ray scattered;
+        glm::vec3 attenuation;
+        if (rec.mat_ptr->scatter(r, rec, attenuation, scattered))
+            return attenuation * color(rtx, scattered, max_bounces - 1);
+
+        return glm::vec3(0.0f);
     }
 
     // If no hit, return sky color
@@ -124,11 +93,11 @@ glm::vec3 color(RTContext &rtx, const Ray &r, int max_bounces)
 // MODIFY THIS FUNCTION!
 void setupScene(RTContext &rtx, const char *filename)
 {
-    g_scene.ground = Sphere(glm::vec3(0.0f, -1000.5f, 0.0f), 1000.0f);
+    g_scene.ground = Sphere(glm::vec3(0.0f, -1000.5f, 0.0f), 1000.0f, new diffuse(glm::vec3(1.0f, 0.0f, 0.0f)));
     g_scene.spheres = {
-        Sphere(glm::vec3(0.0f, 0.0f, 0.0f), 0.5f),
-        Sphere(glm::vec3(1.0f, 0.0f, 0.0f), 0.5f),
-        Sphere(glm::vec3(-1.0f, 0.0f, 0.0f), 0.5f),
+        Sphere(glm::vec3(0.0f, 0.0f, 0.0f), 0.5f, new diffuse(glm::vec3(1.0f, 1.0f, 0.0f))),
+        Sphere(glm::vec3(1.0f, 0.0f, 0.0f), 0.5f, new diffuse(glm::vec3(1.0f, 0.0f, 1.0f))),
+        Sphere(glm::vec3(-1.0f, 0.0f, 0.0f), 0.5f, new diffuse(glm::vec3(0.0f, 0.0f, 1.0f))),
     };
     //g_scene.boxes = {
     //    Box(glm::vec3(0.0f, -0.25f, 0.0f), glm::vec3(0.25f)),
