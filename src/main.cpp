@@ -146,6 +146,8 @@ void showGui(Context &ctx)
     // Add more settings and parameters here
     // ...
 
+    if (ImGui::Checkbox("Anti aliasing", &ctx.rtx.anti_alias)) { rt::resetAccumulation(ctx.rtx); }
+
     if (ImGui::Checkbox("Gamma correction", &ctx.rtx.gamma)) { rt::resetAccumulation(ctx.rtx); }
 
     ImGui::Text("Progress");

@@ -93,11 +93,11 @@ glm::vec3 color(RTContext &rtx, const Ray &r, int max_bounces)
 // MODIFY THIS FUNCTION!
 void setupScene(RTContext &rtx, const char *filename)
 {
-    g_scene.ground = Sphere(glm::vec3(0.0f, -1000.5f, 0.0f), 1000.0f, new diffuse(glm::vec3(1.0f, 0.0f, 0.0f)));
+    g_scene.ground = Sphere(glm::vec3(0.0f, -1000.5f, 0.0f), 1000.0f, new diffuse(glm::vec3(0.8f, 0.8f, 0.0f)));
     g_scene.spheres = {
-        Sphere(glm::vec3(0.0f, 0.0f, 0.0f), 0.5f, new diffuse(glm::vec3(1.0f, 1.0f, 0.0f))),
-        Sphere(glm::vec3(1.0f, 0.0f, 0.0f), 0.5f, new diffuse(glm::vec3(1.0f, 0.0f, 1.0f))),
-        Sphere(glm::vec3(-1.0f, 0.0f, 0.0f), 0.5f, new diffuse(glm::vec3(0.0f, 0.0f, 1.0f))),
+        Sphere(glm::vec3(0.0f, 0.0f, 0.0f), 0.5f, new diffuse(glm::vec3(0.7f, 0.3f, 0.3f))),
+        Sphere(glm::vec3(1.0f, 0.0f, 0.0f), 0.5f, new metal(glm::vec3(0.8f, 0.8f, 0.8f))),
+        Sphere(glm::vec3(-1.0f, 0.0f, 0.0f), 0.5f, new metal(glm::vec3(0.8f, 0.6f, 0.2f))),
     };
     //g_scene.boxes = {
     //    Box(glm::vec3(0.0f, -0.25f, 0.0f), glm::vec3(0.25f)),
@@ -135,9 +135,13 @@ void updateLine(RTContext &rtx, int y)
     // You can try parallelising this loop by uncommenting this line:
     #pragma omp parallel for schedule(dynamic)
     for (int x = 0; x < nx; ++x) {
-        // anti aliasing
-        float u = (float(x) + random_double()) / float(nx);
-        float v = (float(y) + random_double()) / float(ny);
+        float u = (float(x) + 0.5) / float(nx);
+        float v = (float(y) + 0.5) / float(ny);
+        if (rtx.anti_alias)
+        {
+            float u = (float(x) + random_double()) / float(nx);
+            float v = (float(y) + random_double()) / float(ny);
+        }
         Ray r(origin, lower_left_corner + u * horizontal + v * vertical);
         r.A = glm::vec3(world_from_view * glm::vec4(r.A, 1.0f));
         r.B = glm::vec3(world_from_view * glm::vec4(r.B, 0.0f));

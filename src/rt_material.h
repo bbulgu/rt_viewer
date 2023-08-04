@@ -61,4 +61,21 @@ namespace rt {
         glm::vec3 albedo;
     };
 
+    class metal : public Material {
+    public:
+        metal(const glm::vec3& a) : albedo(a) {}
+
+        virtual bool scatter(
+            const Ray& r_in, const HitRecord& rec, glm::vec3& attenuation, Ray& scattered
+        ) const override {
+            glm::vec3 reflected = glm::reflect(glm::normalize(r_in.direction()), rec.normal);
+            scattered = Ray(rec.p, reflected);
+            attenuation = albedo;
+            return (glm::dot(scattered.direction(), rec.normal) > 0);
+        }
+
+    public:
+        glm::vec3 albedo;
+    };
+
 }
