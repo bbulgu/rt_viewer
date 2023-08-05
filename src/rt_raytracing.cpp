@@ -78,7 +78,7 @@ glm::vec3 color(RTContext &rtx, const Ray &r, int max_bounces)
         // Implement lighting for materials here
         Ray scattered;
         glm::vec3 attenuation;
-        if (rec.mat_ptr->scatter(r, rec, attenuation, scattered))
+        if (rec.mat_ptr != NULL && rec.mat_ptr->scatter(r, rec, attenuation, scattered))
             return attenuation * color(rtx, scattered, max_bounces - 1);
 
         return glm::vec3(0.0f);
@@ -95,7 +95,7 @@ void setupScene(RTContext &rtx, const char *filename)
 {
     g_scene.ground = Sphere(glm::vec3(0.0f, -1000.5f, 0.0f), 1000.0f, new diffuse(glm::vec3(0.8f, 0.8f, 0.0f)));
     g_scene.spheres = {
-        Sphere(glm::vec3(0.0f, 0.0f, 0.0f), 0.5f, new diffuse(glm::vec3(0.7f, 0.3f, 0.3f))),
+        //Sphere(glm::vec3(0.0f, 0.0f, 0.0f), 0.5f, new diffuse(glm::vec3(0.7f, 0.3f, 0.3f))),
         Sphere(glm::vec3(1.0f, 0.0f, 0.0f), 0.5f, new metal(glm::vec3(0.8f, 0.8f, 0.8f))),
         Sphere(glm::vec3(-1.0f, 0.0f, 0.0f), 0.5f, new metal(glm::vec3(0.8f, 0.6f, 0.2f))),
     };
@@ -105,18 +105,18 @@ void setupScene(RTContext &rtx, const char *filename)
     //    Box(glm::vec3(-1.0f, -0.25f, 0.0f), glm::vec3(0.25f)),
     //};
 
-    //cg::OBJMesh mesh;
-    //cg::objMeshLoad(mesh, filename);
-    //g_scene.mesh.clear();
-    //for (int i = 0; i < mesh.indices.size(); i += 3) {
-    //    int i0 = mesh.indices[i + 0];
-    //    int i1 = mesh.indices[i + 1];
-    //    int i2 = mesh.indices[i + 2];
-    //    glm::vec3 v0 = mesh.vertices[i0] + glm::vec3(0.0f, 0.135f, 0.0f);
-    //    glm::vec3 v1 = mesh.vertices[i1] + glm::vec3(0.0f, 0.135f, 0.0f);
-    //    glm::vec3 v2 = mesh.vertices[i2] + glm::vec3(0.0f, 0.135f, 0.0f);
-    //    g_scene.mesh.push_back(Triangle(v0, v1, v2));
-    //}
+    cg::OBJMesh mesh;
+    cg::objMeshLoad(mesh, filename);
+    g_scene.mesh.clear();
+    for (int i = 0; i < mesh.indices.size(); i += 3) {
+        int i0 = mesh.indices[i + 0];
+        int i1 = mesh.indices[i + 1];
+        int i2 = mesh.indices[i + 2];
+        glm::vec3 v0 = mesh.vertices[i0] + glm::vec3(0.0f, 0.135f, 0.0f);
+        glm::vec3 v1 = mesh.vertices[i1] + glm::vec3(0.0f, 0.135f, 0.0f);
+        glm::vec3 v2 = mesh.vertices[i2] + glm::vec3(0.0f, 0.135f, 0.0f);
+        g_scene.mesh.push_back(Triangle(v0, v1, v2, new diffuse(glm::vec3(0.5f, 0.75f, 0.5f))));
+    }
 }
 
 
