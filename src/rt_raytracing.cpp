@@ -47,11 +47,15 @@ bool hit_world(const Ray &r, float t_min, float t_max, HitRecord &rec)
             rec = temp_rec;
         }
     }
-    for (int i = 0; i < g_scene.mesh.size(); ++i) {
-        if (g_scene.mesh[i].hit(r, t_min, closest_so_far, temp_rec)) {
-            hit_anything = true;
-            closest_so_far = temp_rec.t;
-            rec = temp_rec;
+    // only check mesh if there's a hit in the bounding boxs
+    if (g_scene.mesh_bbox.hit(r, t_min, closest_so_far, temp_rec))
+    {
+        for (int i = 0; i < g_scene.mesh.size(); ++i) {
+            if (g_scene.mesh[i].hit(r, t_min, closest_so_far, temp_rec)) {
+                hit_anything = true;
+                    closest_so_far = temp_rec.t;
+                    rec = temp_rec;
+            }
         }
     }
     return hit_anything;
@@ -95,8 +99,8 @@ void setupScene(RTContext &rtx, const char *filename)
 {
     g_scene.ground = Sphere(glm::vec3(0.0f, -1000.5f, 0.0f), 1000.0f, new diffuse(glm::vec3(0.8f, 0.8f, 0.0f)));
     g_scene.spheres = {
-        //Sphere(glm::vec3(0.0f, 0.0f, 0.0f), 0.5f, new diffuse(glm::vec3(0.7f, 0.3f, 0.3f))),
-        Sphere(glm::vec3(1.0f, 0.0f, 0.0f), 0.5f, new metal(glm::vec3(0.8f, 0.8f, 0.8f))),
+        Sphere(glm::vec3(0.0f, 0.0f, 0.0f), 0.5f, new diffuse(glm::vec3(0.7f, 0.3f, 0.3f))),
+        //Sphere(glm::vec3(1.0f, 0.0f, 0.0f), 0.5f, new metal(glm::vec3(0.8f, 0.8f, 0.8f))),
         Sphere(glm::vec3(-1.0f, 0.0f, 0.0f), 0.5f, new metal(glm::vec3(0.8f, 0.6f, 0.2f))),
     };
     //g_scene.boxes = {
@@ -104,6 +108,14 @@ void setupScene(RTContext &rtx, const char *filename)
     //    Box(glm::vec3(1.0f, -0.25f, 0.0f), glm::vec3(0.25f)),
     //    Box(glm::vec3(-1.0f, -0.25f, 0.0f), glm::vec3(0.25f)),
     //};
+
+
+    // load mesh and calculate bounding box
+    glm::vec3 center;
+    glm::vec3 radius;
+
+    glm::vec3 minVector;
+    glm::vec3 maxVector;
 
     cg::OBJMesh mesh;
     cg::objMeshLoad(mesh, filename);
@@ -115,8 +127,15 @@ void setupScene(RTContext &rtx, const char *filename)
         glm::vec3 v0 = mesh.vertices[i0] + glm::vec3(0.0f, 0.135f, 0.0f);
         glm::vec3 v1 = mesh.vertices[i1] + glm::vec3(0.0f, 0.135f, 0.0f);
         glm::vec3 v2 = mesh.vertices[i2] + glm::vec3(0.0f, 0.135f, 0.0f);
+
+        maxVector = glm::max(v2, glm::max(v1, glm::max(maxVector, v0)));
+        minVector = glm::min(v2, glm::min(v1, glm::min(minVector, v0)));
         g_scene.mesh.push_back(Triangle(v0, v1, v2, new diffuse(glm::vec3(0.5f, 0.75f, 0.5f))));
     }
+    glm::vec3 cent = 0.5f * (maxVector + minVector);
+    glm::vec3 rad = glm::abs(maxVector - minVector) * 0.5f;
+    g_scene.mesh_bbox = Box(glm::vec3(100.0f, 100.f, 100.0f), glm::vec3(1000.0f, 1000.f, 1000.0f));
+    g_scene.mesh_bbox = Box(cent, rad);
 }
 
 
