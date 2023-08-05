@@ -21,6 +21,10 @@ namespace rt {
         return glm::vec3(random_double(), random_double(), random_double());
     }
 
+    inline static glm::vec3 random_unit_vector() {
+        return glm::normalize(random());
+    }
+
     inline static glm::vec3 random(double min, double max) {
         return glm::vec3(random_double(min, max), random_double(min, max), random_double(min, max));
     }
@@ -38,6 +42,13 @@ namespace rt {
         }
     }
 
+    inline bool near_zero(glm::vec3 v) {
+    // Return true if the vector is close to zero in all dimensions.
+        const auto s = 1e-8;
+        return (fabs(v[0]) < s) && (fabs(v[1]) < s) && (fabs(v[2]) < s);
+    }
+ 
+
     class Material {
     public:
         virtual bool scatter(
@@ -51,9 +62,15 @@ namespace rt {
         virtual bool scatter(
             const Ray& r_in, const HitRecord& rec, glm::vec3& attenuation, Ray& scattered
         ) const override {
-            glm::vec3 target = rec.p + rec.normal + random_in_unit_sphere();
-            scattered = Ray(rec.p, target - rec.p);
+            glm::vec3 scatter_direction = rec.normal + random_unit_vector();
+
+            // Catch degenerate scatter direction
+            if (near_zero(scatter_direction))
+                scatter_direction = rec.normal;
+
+            scattered = Ray(rec.p, scatter_direction);
             attenuation = albedo;
+
             return true;
         }
 
@@ -72,6 +89,13 @@ namespace rt {
             scattered = Ray(rec.p, reflected);
             attenuation = albedo;
             return (glm::dot(scattered.direction(), rec.normal) > 0);
+            /*
+            glm::vec3 reflected = reflect(unit_vector(ray_in.direction()), rec.normal);
+        scattered = Ray(rec.p, reflected);
+        attenuation = albedo;
+
+        return (glm::dot(scattered.direction(), rec.normal) > 0);
+        */
         }
 
     public:
