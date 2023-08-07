@@ -21,6 +21,8 @@
 #include <cstdlib>
 #include <algorithm>
 
+#include <chrono>
+
 // Struct for resources and state
 struct Context {
     int width;
@@ -279,6 +281,7 @@ void resizeCallback(GLFWwindow *window, int width, int height)
 
 int main(void)
 {
+    std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
     Context ctx;
 
     // Create a GLFW window
@@ -323,6 +326,15 @@ int main(void)
         ctx.elapsed_time = glfwGetTime();
         ImGui_ImplGlfwGL3_NewFrame();
         display(ctx);
+        // uncomment to time implementation 
+        /*
+        if (ctx.rtx.current_frame == 10) {
+            std::chrono::high_resolution_clock::time_point end_time = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> elapsed_time = std::chrono::duration_cast<std::chrono::duration<double>>(end_time - start_time);
+            std::cout << "Elapsed time for 10 frames: " << elapsed_time.count() << " seconds" << std::endl;
+            break;
+        }
+        */
         ImGui::Render();
         glfwSwapBuffers(ctx.window);
     }
