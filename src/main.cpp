@@ -150,6 +150,21 @@ void showGui(Context &ctx)
 
     if (ImGui::Checkbox("Gamma correction", &ctx.rtx.gamma)) { rt::resetAccumulation(ctx.rtx); }
 
+    if (ImGui::ColorEdit3("Diffuse ball properties", &ctx.rtx.diffuseBallColor[0])) 
+    { 
+        rt::resetAccumulation(ctx.rtx);
+        rt::setupScene(ctx.rtx, (modelDir() + "bunny_lowpoly.obj").c_str());
+    }
+    if (ImGui::ColorEdit3("Diffuse mesh properties", &ctx.rtx.diffuseMeshColor[0])) {
+        rt::resetAccumulation(ctx.rtx);
+        rt::setupScene(ctx.rtx, (modelDir() + "bunny_lowpoly.obj").c_str());
+    }
+    if (ImGui::ColorEdit3("Metal ball properties", &ctx.rtx.metalBallColor[0])) {
+        rt::resetAccumulation(ctx.rtx);
+        rt::setupScene(ctx.rtx, (modelDir() + "bunny_lowpoly.obj").c_str());
+    }
+
+
     ImGui::Text("Progress");
     ImGui::ProgressBar(float(ctx.rtx.current_frame) / ctx.rtx.max_frames);
     if (ImGui::Button("Freeze/Resume")) { ctx.rtx.freeze = !ctx.rtx.freeze; }

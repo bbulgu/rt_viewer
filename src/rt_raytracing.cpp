@@ -99,9 +99,9 @@ void setupScene(RTContext &rtx, const char *filename)
 {
     g_scene.ground = Sphere(glm::vec3(0.0f, -1000.5f, 0.0f), 1000.0f, new diffuse(glm::vec3(0.8f, 0.8f, 0.0f)));
     g_scene.spheres = {
-        Sphere(glm::vec3(0.0f, 0.0f, 0.0f), 0.5f, new diffuse(glm::vec3(0.7f, 0.3f, 0.3f))),
-        //Sphere(glm::vec3(1.0f, 0.0f, 0.0f), 0.5f, new metal(glm::vec3(0.8f, 0.8f, 0.8f))),
-        Sphere(glm::vec3(-1.0f, 0.0f, 0.0f), 0.5f, new metal(glm::vec3(0.8f, 0.6f, 0.2f))),
+        //Sphere(glm::vec3(0.0f, 0.0f, 0.0f), 0.5f, new diffuse(rtx.diffuseBallColor)),
+        Sphere(glm::vec3(1.0f, 0.0f, 0.0f), 0.5f, new diffuse(rtx.diffuseBallColor)),
+        Sphere(glm::vec3(-1.0f, 0.0f, 0.0f), 0.5f, new metal(rtx.metalBallColor)),
     };
     //g_scene.boxes = {
     //    Box(glm::vec3(0.0f, -0.25f, 0.0f), glm::vec3(0.25f)),
@@ -130,7 +130,7 @@ void setupScene(RTContext &rtx, const char *filename)
 
         maxVector = glm::max(v2, glm::max(v1, glm::max(maxVector, v0)));
         minVector = glm::min(v2, glm::min(v1, glm::min(minVector, v0)));
-        g_scene.mesh.push_back(Triangle(v0, v1, v2, new diffuse(glm::vec3(0.5f, 0.75f, 0.5f))));
+        g_scene.mesh.push_back(Triangle(v0, v1, v2, new diffuse(rtx.diffuseMeshColor)));
     }
     glm::vec3 cent = 0.5f * (maxVector + minVector);
     glm::vec3 rad = glm::abs(maxVector - minVector) * 0.5f;

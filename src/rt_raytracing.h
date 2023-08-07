@@ -26,6 +26,9 @@ struct RTContext {
     // ...
     bool gamma = true;
     bool anti_alias = true;
+    glm::vec3 diffuseBallColor = glm::vec3(0.7f, 0.3f, 0.3f);
+    glm::vec3 metalBallColor = glm::vec3(0.8f, 0.6f, 0.2f);
+    glm::vec3 diffuseMeshColor = glm::vec3(0.5f, 0.75f, 0.5f);
 };
 
 void setupScene(RTContext &rtx, const char *mesh_filename);
